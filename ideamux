@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+TMUX=tmux
+IDEAMUX_SOCKET_DIR=$HOME/.ideamux
+
+if [ -z "$IDEAMUX_SOCKET_PATH" ]; then
+  git_root=$(git rev-parse --show-toplevel)
+  IDEAMUX_SOCKET_PATH=$IDEAMUX_SOCKET_DIR/$(md5 -qs "$git_root").sock
+fi
+
+mkdir -p $IDEAMUX_SOCKET_DIR
+if ${TMUX} -S "${IDEAMUX_SOCKET_PATH}" has-session 2> /dev/null; then
+  exec ${TMUX} -S "${IDEAMUX_SOCKET_PATH}" attach-session
+else
+  exec ${TMUX} -S "${IDEAMUX_SOCKET_PATH}" new-session -c "$PWD"
+fi
